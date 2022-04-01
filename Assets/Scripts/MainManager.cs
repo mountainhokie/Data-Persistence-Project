@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text HighScoreText;
+
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,7 +21,10 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+    private string UserName;
+    private string HighScoreUserName;
+    private int HighScore;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,6 +42,13 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        HighScoreUserName = MenuManager.Instance.HighScoreUserName;
+        HighScore = MenuManager.Instance.HighScore;
+        UserName = MenuManager.Instance.UserName;
+        ScoreText.text = UserName + ": Score: 0";
+        HighScoreText.text = "Best Score: " + HighScoreUserName + ": Score: " + HighScore;
+
     }
 
     private void Update()
@@ -60,17 +73,30 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+
     }
 
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = MenuManager.Instance.UserName + ": " + $"Score : {m_Points}";
+        if(m_Points > HighScore) {
+            HighScore = m_Points;
+            MenuManager.Instance.HighScore = HighScore;
+            MenuManager.Instance.HighScoreUserName = MenuManager.Instance.UserName;
+            HighScoreText.text = "Best Score: " + MenuManager.Instance.HighScoreUserName + ": Score: " + HighScore;
+        }
+
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        Debug.Log("Game Over");
+        MenuManager.Instance.SaveHighScore();
+
     }
+
+
 }
